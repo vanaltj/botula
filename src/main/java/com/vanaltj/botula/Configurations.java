@@ -35,12 +35,14 @@ public class Configurations {
     private static final String BOTULA_HOME = ".botula";
     private static final String CONFIG_FILE = "conf.properties";
 
-    private static final String PROPERTY_NAME = "name";
-    private static final String PROPERTY_FINGER = "finger";
-    private static final String PROPERTY_ADMIN = "admin";
-    private static final String PROPERTY_SERVER = "server";
-    private static final String PROPERTY_CHANNELS = "channels";
+    private static final String PROPERTY_NETWORKS = "networks";
+    private static final String PROPERTY_NAME = ".name";
+    private static final String PROPERTY_FINGER = ".finger";
+    private static final String PROPERTY_ADMIN = ".admin";
+    private static final String PROPERTY_SERVER = ".server";
+    private static final String PROPERTY_CHANNELS = ".channels";
 
+    private static final String DEFAULT_NETWORK = "example";
     private static final String DEFAULT_NAME = "CountBotula";
     private static final String DEFAULT_FINGER = "I'm Henry the Eighth I Am!";
     private static final String DEFAULT_ADMIN = "root";
@@ -57,7 +59,11 @@ public class Configurations {
     public static Collection<BotConfig> getBotConfigs() throws IOException, MadeNewPropertiesException {
         HashSet<BotConfig> configs = new HashSet<BotConfig>();
         Properties properties = getConfigProperties();
-        configs.add(getConfigFromProperties(properties));
+        String networksProperty = properties.getProperty(PROPERTY_NETWORKS);
+        for (String network : splitByComma(networksProperty)) {
+            configs.add(getConfigFromProperties(network, properties));
+            
+        }
         return configs;
     }
 
@@ -99,29 +105,35 @@ public class Configurations {
     }
 
     private static void populateDefaultProperties(Properties properties) {
-        properties.put(PROPERTY_NAME, DEFAULT_NAME);
-        properties.put(PROPERTY_FINGER, DEFAULT_FINGER);
-        properties.put(PROPERTY_ADMIN, DEFAULT_ADMIN);
-        properties.put(PROPERTY_SERVER, DEFAULT_SERVER);
-        properties.put(PROPERTY_CHANNELS, DEFAULT_CHANNELS);
+        properties.put(DEFAULT_NETWORK + PROPERTY_FINGER, DEFAULT_FINGER);
+        properties.put(DEFAULT_NETWORK + PROPERTY_NAME, DEFAULT_NAME);
+        properties.put(DEFAULT_NETWORK + PROPERTY_CHANNELS, DEFAULT_CHANNELS);
+        properties.put(DEFAULT_NETWORK + PROPERTY_ADMIN, DEFAULT_ADMIN);
+        properties.put(DEFAULT_NETWORK + PROPERTY_SERVER, DEFAULT_SERVER);
+        properties.put(PROPERTY_NETWORKS, DEFAULT_NETWORK);
     }
 
     private static void storeProperties(Properties properties, File propsFile) throws IOException {
         properties.store(new FileWriter(propsFile), DEFAULT_COMMENT);
     }
 
-    private static BotConfig getConfigFromProperties(Properties properties) {
-        String name = properties.getProperty(PROPERTY_NAME);
-        String finger = properties.getProperty(PROPERTY_FINGER);
-        String adminNick = properties.getProperty(PROPERTY_ADMIN);
-        String server = properties.getProperty(PROPERTY_SERVER);
-        String channelsProperty = properties.getProperty(PROPERTY_CHANNELS);
-        String[] channelsSplit = channelsProperty.split(",");
-        HashSet<String> channels = new HashSet<String>();
-        for (String channel : channelsSplit) {
-            channels.add(channel.trim());
-        }
+    private static BotConfig getConfigFromProperties(String network, Properties properties) {
+        String name = properties.getProperty(network + PROPERTY_NAME);
+        String finger = properties.getProperty(network + PROPERTY_FINGER);
+        String adminNick = properties.getProperty(network + PROPERTY_ADMIN);
+        String server = properties.getProperty(network + PROPERTY_SERVER);
+        String channelsProperty = properties.getProperty(network + PROPERTY_CHANNELS);
+        Collection<String> channels = splitByComma(channelsProperty);
         return new BotConfig(name, finger, adminNick, server, channels);
+    }
+
+    private static Collection<String> splitByComma(String input) {
+        HashSet<String> toReturn = new HashSet<String>();
+        String[] inputSplit = input.split(",");
+        for (String item : inputSplit) {
+            toReturn.add(item.trim());
+        }
+        return toReturn;
     }
 
     static class MadeNewPropertiesException extends Exception {
