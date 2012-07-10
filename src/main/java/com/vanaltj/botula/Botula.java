@@ -20,28 +20,61 @@
 package com.vanaltj.botula;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import org.pircbotx.PircBotX;
 import org.pircbotx.exception.IrcException;
 import org.pircbotx.hooks.managers.ListenerManager;
 
+import com.vanaltj.botula.Configurations.MadeNewPropertiesException;
 import com.vanaltj.botula.listeners.commands.AdminCommandListener;
 import com.vanaltj.botula.listeners.commands.ChannelCommandListener;
 
-public class Botula {
+public class Botula extends PircBotX {
+
+    private String server;
+    private Collection<String> channels;
+
+    private Botula(BotConfig conf) {
+        super();
+        setName(conf.getName());
+        String finger = conf.getFinger();
+        if (finger != null) {
+            setFinger(finger);
+        }
+        server = conf.getServer();
+        this.channels = conf.getChannels();
+        ListenerManager<? extends PircBotX> lm = getListenerManager();
+        lm.addListener(new AdminCommandListener(conf.getAdminNick()));
+        lm.addListener(new ChannelCommandListener());
+    }
+
+    private void connectAndJoinChannels() throws IOException, IrcException {
+        connect(server);
+        for (String channel : channels) {
+            joinChannel(channel);
+        }
+    }
 
     public static void main(String[] args) {
-        PircBotX bot = new PircBotX();
-        bot.setName("CountBotula");
-        bot.setFinger("I'm Henry VIII I am.");
-        ListenerManager<? extends PircBotX> lm = bot.getListenerManager();
-        lm.addListener(new AdminCommandListener("vanaltj"));
-        lm.addListener(new ChannelCommandListener());
+        Collection<BotConfig> configs = null;
         try {
-            bot.connect("irc.example.com");
-        } catch (IOException | IrcException e) {
-            e.printStackTrace();
+            configs = Configurations.getBotConfigs();
+        } catch (MadeNewPropertiesException mnpe) {
+            System.exit(0);
+        } catch (IOException ioe) {
+            System.out.println("Dang, can't even get configurations?\n");
+            ioe.printStackTrace();
+            System.out.println("\n\nGiving up now.");
+            System.exit(-1);
         }
-        bot.joinChannel("#botula");
+        for (BotConfig conf : configs) {
+            Botula bot = new Botula(conf);
+            try {
+                bot.connectAndJoinChannels();
+            } catch (IOException | IrcException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
