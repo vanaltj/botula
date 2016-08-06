@@ -19,19 +19,18 @@
 
 package com.vanaltj.botula.listeners.commands;
 
-import org.pircbotx.PircBotX;
 import org.pircbotx.hooks.events.MessageEvent;
 
 import com.vanaltj.botula.commands.channel.ChannelCommand;
 
-public class ChannelCommandListener extends CommandListener<MessageEvent<PircBotX>> {
+public class ChannelCommandListener extends CommandListener {
 
     public ChannelCommandListener() {
         super(ChannelCommand.class);
     }
 
     @Override
-    public void onMessage(MessageEvent<PircBotX> event) throws Exception {
+    public void onMessage(MessageEvent event) throws Exception {
         runCommand(event.getMessage().split(" "), event);
     }
 }

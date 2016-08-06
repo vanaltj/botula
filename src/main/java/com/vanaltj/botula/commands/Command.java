@@ -19,10 +19,9 @@
 
 package com.vanaltj.botula.commands;
 
-import org.pircbotx.PircBotX;
 import org.pircbotx.hooks.Event;
 
-public abstract class Command<E extends Event<? extends PircBotX>> {
+public abstract class Command<E extends Event> {
 
     /**
      * Run the command.

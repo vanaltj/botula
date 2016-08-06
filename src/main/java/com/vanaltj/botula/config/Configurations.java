@@ -17,7 +17,7 @@
  * along with Botula.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.vanaltj.botula;
+package com.vanaltj.botula.config;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -27,6 +27,12 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Properties;
+
+import org.pircbotx.Configuration;
+import org.pircbotx.hooks.managers.SequentialListenerManager;
+
+import com.vanaltj.botula.listeners.commands.AdminCommandListener;
+import com.vanaltj.botula.listeners.commands.ChannelCommandListener;
 
 public class Configurations {
     // TODO support more than one server.
@@ -56,8 +62,8 @@ public class Configurations {
 
     private Configurations() {} // Not to be instantiated.
 
-    public static Collection<BotConfig> getBotConfigs() throws IOException, MadeNewPropertiesException {
-        HashSet<BotConfig> configs = new HashSet<BotConfig>();
+    public static Collection<Configuration> getBotConfigs() throws IOException {
+        HashSet<Configuration> configs = new HashSet<Configuration>();
         Properties properties = getConfigProperties();
         String networksProperty = properties.getProperty(PROPERTY_NETWORKS);
         for (String network : splitByComma(networksProperty)) {
@@ -67,7 +73,7 @@ public class Configurations {
         return configs;
     }
 
-    private static Properties getConfigProperties() throws IOException, MadeNewPropertiesException {
+    private static Properties getConfigProperties() throws IOException {
         Properties properties = new Properties();
         String home = System.getenv(ENV_BOTULA_HOME);
         if (home == null) {
@@ -82,7 +88,6 @@ public class Configurations {
             properties.load(new FileReader(propsFile));
         } catch (FileNotFoundException fnf) {
             createPropertiesFromDefault(properties, propsFile);
-            throw new MadeNewPropertiesException("Just Because.");
         }
         return properties;
     }
@@ -114,17 +119,38 @@ public class Configurations {
     }
 
     private static void storeProperties(Properties properties, File propsFile) throws IOException {
-        properties.store(new FileWriter(propsFile), DEFAULT_COMMENT);
+        try (FileWriter writer = new FileWriter(propsFile)) {
+            properties.store(new FileWriter(propsFile), DEFAULT_COMMENT);
+        }
     }
 
-    private static BotConfig getConfigFromProperties(String network, Properties properties) {
+    private static Configuration getConfigFromProperties(String network, Properties properties) {
+        Configuration.Builder builder = new Configuration.Builder();
         String name = properties.getProperty(network + PROPERTY_NAME);
+        builder.setName(name);
+        builder.setAutoNickChange(true); // Add number to end if nick taken.
         String finger = properties.getProperty(network + PROPERTY_FINGER);
-        String adminNick = properties.getProperty(network + PROPERTY_ADMIN);
+        if (finger != null && finger.length() < 0) {
+            builder.setFinger(finger);
+        }
         String server = properties.getProperty(network + PROPERTY_SERVER);
+        builder.addServer(server);
         String channelsProperty = properties.getProperty(network + PROPERTY_CHANNELS);
         Collection<String> channels = splitByComma(channelsProperty);
-        return new BotConfig(name, finger, adminNick, server, channels);
+        for (String channel : channels) {
+            builder.addAutoJoinChannel(channel);
+        }
+
+        SequentialListenerManager.SequentialListenerManagerBuilder lmBuilder =
+                SequentialListenerManager.builder();
+        SequentialListenerManager lm = lmBuilder.build();
+        String adminNick = properties.getProperty(network + PROPERTY_ADMIN);
+        if (adminNick != null && adminNick.length() > 0) {
+            lm.addListenerSequential(new AdminCommandListener(adminNick));
+        }
+        lm.addListenerPooled(new ChannelCommandListener());
+        builder.setListenerManager(lm);
+        return builder.buildConfiguration();
     }
 
     private static Collection<String> splitByComma(String input) {
@@ -134,14 +160,5 @@ public class Configurations {
             toReturn.add(item.trim());
         }
         return toReturn;
-    }
-
-    static class MadeNewPropertiesException extends Exception {
-
-        private static final long serialVersionUID = -4408620134410497530L;
-
-        public MadeNewPropertiesException(String message) {
-            super(message);
-        }
     }
 }

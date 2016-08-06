@@ -19,7 +19,6 @@
 
 package com.vanaltj.botula.commands.channel;
 
-import org.pircbotx.PircBotX;
 import org.pircbotx.hooks.events.MessageEvent;
 
 public class EchoCommand extends ChannelCommand {
@@ -27,7 +26,7 @@ public class EchoCommand extends ChannelCommand {
     public static final String TRIGGER = "!ping";
 
     @Override
-    public void run(String[] args, MessageEvent<? extends PircBotX> event) {
+    public void run(String[] args, MessageEvent event) {
         event.respond("Pong!");
     }
 

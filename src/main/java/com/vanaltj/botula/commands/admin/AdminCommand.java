@@ -19,11 +19,10 @@
 
 package com.vanaltj.botula.commands.admin;
 
-import org.pircbotx.PircBotX;
 import org.pircbotx.hooks.events.PrivateMessageEvent;
 
 import com.vanaltj.botula.commands.Command;
 
-public abstract class AdminCommand extends Command<PrivateMessageEvent<? extends PircBotX>> {
+public abstract class AdminCommand extends Command<PrivateMessageEvent> {
 
 }

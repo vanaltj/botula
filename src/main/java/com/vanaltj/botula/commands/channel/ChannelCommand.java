@@ -19,11 +19,10 @@
 
 package com.vanaltj.botula.commands.channel;
 
-import org.pircbotx.PircBotX;
 import org.pircbotx.hooks.events.MessageEvent;
 
 import com.vanaltj.botula.commands.Command;
 
-public abstract class ChannelCommand extends Command<MessageEvent<? extends PircBotX>> {
+public abstract class ChannelCommand extends Command<MessageEvent> {
 
 }

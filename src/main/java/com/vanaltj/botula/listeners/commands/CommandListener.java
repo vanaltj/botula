@@ -23,38 +23,37 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
 
-import org.pircbotx.PircBotX;
 import org.pircbotx.hooks.Event;
 import org.pircbotx.hooks.ListenerAdapter;
 
 import com.vanaltj.botula.commands.Command;
 
-public abstract class CommandListener<E extends Event<? extends PircBotX>> extends ListenerAdapter<PircBotX> {
+public abstract class CommandListener extends ListenerAdapter {
 
-    private Class<Command<E>> commandClass;
-    protected Map<String, Command<E>> commands;
+    private Class<Command<Event>> commandClass;
+    protected Map<String, Command<Event>> commands;
 
     @SuppressWarnings("unchecked")
     public CommandListener(Class<?> commandClass) {
-        this.commandClass = (Class<Command<E>>) commandClass;
+        this.commandClass = (Class<Command<Event>>) commandClass;
         initCommands();
     }
 
     private void initCommands() {
         commands = new HashMap<>();
-        ServiceLoader<Command<E>> cmds = ServiceLoader.load(commandClass, getClass().getClassLoader());
+        ServiceLoader<Command<Event>> cmds = ServiceLoader.load(commandClass, getClass().getClassLoader());
         if (!cmds.iterator().hasNext()) {
             System.out.println("No commands of type: " + commandClass);
         }
-        for (Command<E> cmd : cmds) {
+        for (Command<Event> cmd : cmds) {
             System.out.println("Loading command: " + cmd.getTrigger());
             commands.put(cmd.getTrigger(), cmd);
         }
     }
 
-    protected void runCommand(String[] commandParts, E event) {
+    protected void runCommand(String[] commandParts, Event event) {
         if (commandParts.length > 0) {
-            Command<E> cmd = commands.get(commandParts[0].trim());
+            Command<Event> cmd = commands.get(commandParts[0].trim());
             if (cmd != null) {
                 cmd.run(commandParts, event);
             }

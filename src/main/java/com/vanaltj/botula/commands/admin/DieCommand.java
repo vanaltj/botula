@@ -27,12 +27,11 @@ public class DieCommand extends AdminCommand {
     private static final String TRIGGER = "die";
 
     @Override
-    public void run(String[] args, PrivateMessageEvent<? extends PircBotX> event) {
+    public void run(String[] args, PrivateMessageEvent event) {
 
         event.respond("OK I quit now.");
         PircBotX bot = event.getBot();
-        bot.quitServer("So long and thanks for all the fish!");
-        bot.disconnect();
+        bot.sendIRC().quitServer("So long and thanks for all the fish!");
         System.exit(0);
 
     }

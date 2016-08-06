@@ -19,12 +19,11 @@
 
 package com.vanaltj.botula.listeners.commands;
 
-import org.pircbotx.PircBotX;
 import org.pircbotx.hooks.events.PrivateMessageEvent;
 
 import com.vanaltj.botula.commands.admin.AdminCommand;
 
-public class AdminCommandListener extends CommandListener<PrivateMessageEvent<PircBotX>> {
+public class AdminCommandListener extends CommandListener {
 
     private String admin;
 
@@ -34,13 +33,13 @@ public class AdminCommandListener extends CommandListener<PrivateMessageEvent<Pi
     }
 
     @Override
-    public void onPrivateMessage(PrivateMessageEvent<PircBotX> event) throws Exception {
+    public void onPrivateMessage(PrivateMessageEvent event) throws Exception {
         if (adminApproved(event)) {
             runCommand(event.getMessage().split(" "), event);
         }
     }
 
-    private boolean adminApproved(PrivateMessageEvent<PircBotX> event) {
+    private boolean adminApproved(PrivateMessageEvent event) {
         return event.getUser().getNick().equals(admin);
     }
 }
