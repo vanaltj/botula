@@ -19,9 +19,9 @@
 
 package com.vanaltj.botula.commands;
 
-import org.pircbotx.hooks.Event;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
-public abstract class Command<E extends Event> {
+public abstract class Command<E extends GenericMessageEvent> {
 
     /**
      * Run the command.

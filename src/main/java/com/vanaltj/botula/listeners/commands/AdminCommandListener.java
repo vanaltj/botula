@@ -35,7 +35,7 @@ public class AdminCommandListener extends CommandListener {
     @Override
     public void onPrivateMessage(PrivateMessageEvent event) throws Exception {
         if (adminApproved(event)) {
-            runCommand(event.getMessage().split(" "), event);
+            runCommand(event);
         }
     }
 

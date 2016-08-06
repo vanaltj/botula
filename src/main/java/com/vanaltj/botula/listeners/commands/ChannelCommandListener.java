@@ -31,6 +31,6 @@ public class ChannelCommandListener extends CommandListener {
 
     @Override
     public void onMessage(MessageEvent event) throws Exception {
-        runCommand(event.getMessage().split(" "), event);
+        runCommand(event);
     }
 }

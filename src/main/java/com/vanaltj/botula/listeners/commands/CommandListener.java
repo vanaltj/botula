@@ -23,37 +23,38 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
 
-import org.pircbotx.hooks.Event;
 import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.types.GenericMessageEvent;
 
 import com.vanaltj.botula.commands.Command;
 
 public abstract class CommandListener extends ListenerAdapter {
 
-    private Class<Command<Event>> commandClass;
-    protected Map<String, Command<Event>> commands;
+    private Class<Command<GenericMessageEvent>> commandClass;
+    protected Map<String, Command<GenericMessageEvent>> commands;
 
     @SuppressWarnings("unchecked")
     public CommandListener(Class<?> commandClass) {
-        this.commandClass = (Class<Command<Event>>) commandClass;
+        this.commandClass = (Class<Command<GenericMessageEvent>>) commandClass;
         initCommands();
     }
 
     private void initCommands() {
         commands = new HashMap<>();
-        ServiceLoader<Command<Event>> cmds = ServiceLoader.load(commandClass, getClass().getClassLoader());
+        ServiceLoader<Command<GenericMessageEvent>> cmds = ServiceLoader.load(commandClass, getClass().getClassLoader());
         if (!cmds.iterator().hasNext()) {
             System.out.println("No commands of type: " + commandClass);
         }
-        for (Command<Event> cmd : cmds) {
+        for (Command<GenericMessageEvent> cmd : cmds) {
             System.out.println("Loading command: " + cmd.getTrigger());
             commands.put(cmd.getTrigger(), cmd);
         }
     }
 
-    protected void runCommand(String[] commandParts, Event event) {
+    protected void runCommand(GenericMessageEvent event) {
+        String[] commandParts = event.getMessage().split(" ");
         if (commandParts.length > 0) {
-            Command<Event> cmd = commands.get(commandParts[0].trim());
+            Command<GenericMessageEvent> cmd = commands.get(commandParts[0].trim());
             if (cmd != null) {
                 cmd.run(commandParts, event);
             }
