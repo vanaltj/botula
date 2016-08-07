@@ -33,6 +33,7 @@ import org.pircbotx.hooks.managers.SequentialListenerManager;
 
 import com.vanaltj.botula.listeners.commands.AdminCommandListener;
 import com.vanaltj.botula.listeners.commands.ChannelCommandListener;
+import com.vanaltj.botula.listeners.reactions.ButtBotListener;
 
 public class Configurations {
     // TODO support more than one server.
@@ -149,6 +150,7 @@ public class Configurations {
             lm.addListenerSequential(new AdminCommandListener(adminNick));
         }
         lm.addListenerPooled(new ChannelCommandListener());
+        lm.addListenerPooled(new ButtBotListener(name));
         builder.setListenerManager(lm);
         return builder.buildConfiguration();
     }
