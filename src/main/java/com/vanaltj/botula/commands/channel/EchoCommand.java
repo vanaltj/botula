@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Jon VanAlten
+ * Copyright 2012-2016 Jon VanAlten
  *
  * This file is part of Botula.
  *
